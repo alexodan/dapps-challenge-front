@@ -1,7 +1,8 @@
+// App.js
 import React, { useEffect, useState } from 'react'
 import './App.css'
 import { ethers } from 'ethers'
-import ERC20ABI from './utils/ERC20ABI.json'
+import cDaiABI from './utils/cDaiABI.json'
 
 const App = () => {
   const [currentAccount, setCurrentAccount] = useState('')
@@ -53,7 +54,7 @@ const App = () => {
     if (currentAccount) {
       const { ethereum } = window
       const provider = new ethers.providers.Web3Provider(ethereum)
-      const DAI = new ethers.Contract(CDAI_ADDRESS, ERC20ABI, provider)
+      const DAI = new ethers.Contract(CDAI_ADDRESS, cDaiABI, provider)
       DAI.balanceOf(currentAccount).then(balance => {
         setTokenBalance(balance / 1e8)
       })
@@ -64,21 +65,17 @@ const App = () => {
     console.log('Supplying ETH to the Compound Protocol...', '\n')
     const { ethereum } = window
     const provider = new ethers.providers.Web3Provider(ethereum)
-    const DAI = new ethers.Contract(
-      CDAI_ADDRESS,
-      ERC20ABI,
-      provider.getSigner()
-    )
-    await DAI.mint({
-      from: currentAccount,
-      value: amount,
-      gasLimit: ethers.utils.hexlify(ethers.utils.toUtf8Bytes('250000')),
-      gasPrice: ethers.utils.hexlify(ethers.utils.toUtf8Bytes('20000000000')),
-    })
+    const DAI = new ethers.Contract(CDAI_ADDRESS, cDaiABI, provider.getSigner())
+    const tx = await DAI.mint(ethers.utils.parseUnits(amount, 18))
+
+    const txCompleted = await tx.wait()
     DAI.balanceOf(currentAccount).then(balance => {
       setTokenBalance(balance / 1e8)
     })
-    console.log('cETH "Mint" operation successful.', '\n')
+    console.log(
+      'cETH "Mint" operation successful hash: ',
+      txCompleted.transactionHash
+    )
   }
 
   return (
