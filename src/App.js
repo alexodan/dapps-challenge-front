@@ -5,6 +5,7 @@ import { ethers } from 'ethers'
 import cDaiABI from './utils/cDaiABI.json'
 
 const App = () => {
+  // todo: handleApprove?
   const [currentAccount, setCurrentAccount] = useState('')
   const [tokenBalance, setTokenBalance] = useState(null)
   const [amount, setAmount] = useState('')
